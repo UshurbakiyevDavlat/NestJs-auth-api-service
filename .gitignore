@@ -1,0 +1,25 @@
+node_modules
+
+#ide files
+.idea/
+.vscode/
+
+### macOS template
+# General
+.DS_Store
+
+# compodoc
+dist
+.db.json
+.terraform
+
+# CMake
+cmake-build-debug/
+
+# envs
+.env
+
+data
+
+# Logs
+yarn-error.log

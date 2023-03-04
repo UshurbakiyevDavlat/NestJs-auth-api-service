@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package auth;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+// Protobuffers definition for the auth service
+// we will modify as we go
+
+service AuthService {
+  rpc Register (RegisterRequest) returns (RegisterResponse) {}
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc Validate (ValidateRequest) returns (ValidateResponse) {}
+  rpc Profile(google.protobuf.Empty) returns (ProfileResponse) {};
+  rpc Reset(ResetRequest) returns (ResetResponse) {};
+}
+
+// Register
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  int32 role_id = 3;
+}
+
+message RegisterResponse {
+  int32 status = 1;
+  repeated string message = 2;
+}
+
+// Login
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  int32 status = 1;
+  repeated string error = 2;
+  string token = 3;
+}
+
+// Validate
+
+message ValidateRequest {
+  string token = 1;
+}
+
+message ValidateResponse {
+  int32 status = 1;
+  repeated string error = 2;
+  int32 userId = 3;
+}
+
+// Profile
+
+message ProfileRequest {
+  string email = 1;
+}
+
+message ProfileResponse {
+  string email = 1;
+  int32 role_id = 2;
+}
+
+
+message ResetRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message ResetResponse {
+  string message = 1;
+}

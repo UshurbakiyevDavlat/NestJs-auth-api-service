@@ -1,0 +1,17 @@
+export const CACHE_TTL = 5; // 5 seconds
+export const EMAIL_TEMPLATE_ACCOUNT_ACTIVATE = 'account.activate'; // for future password reset
+export const EMAIL_TEMPLATE_PASSWORD_RESET = 'account.reset-password';
+export const EMAIL_TEMPLATE_MFA = 'account.mfa';
+export const REDIS_CLIENT = 'default';
+export const SCHEDULE_TIMEOUT = 3600; // 1 hour
+export const JWT_TOKEN_TTL = '1 day';
+export const JWT_IDENTITY_CACHE_TTL = 180; // 5 minutes
+export const SERVER_PORT = 3000;
+export const DEFAULT_LANGUAGE = 'en';
+export const DEFAULT_STORAGE_BUCKET = 'default';
+export const STORAGE_AWS_S3_HOST = 's3.amazonaws.com'; // for case we use AWS buckets
+export const AVAILABLE_LANGUAGES = [DEFAULT_LANGUAGE];
+export const LANGUAGE_HEADER = 'Accept-Language';
+export const THROTTLE_TTL = 60;
+export const THROTTLE_LIMIT = 30; // allow a hit once 2 seconds basically
+//export const QUEUE_PREFIX = 'queue$$';

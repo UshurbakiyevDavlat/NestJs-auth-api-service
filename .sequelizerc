@@ -1,0 +1,42 @@
+'use strict';
+
+const path = require('path');
+const fs = require('fs-extra');
+
+process.env.MYSQL_NOW = new Date(
+    new Date(new Date(new Date()).toISOString()).getTime() -
+      new Date().getTimezoneOffset() * 60000,
+  )
+  .toISOString()
+  .slice(0, 19)
+  .replace('T', ' ');
+
+const config = path.join(__dirname, '.db.json');
+
+if (!fs.existsSync(config)) {
+  const content = fs.readFileSync(".env");
+  const url = (content.toString().match(/^\s*DB_DSN\s*=\s*['|"](?<url>.+)['|"]\s*$/m).groups || {}).url;
+  const dialect = (url.match(/^(?<dialect>.+):\/\//).groups || {}).dialect;
+  let extra = {};
+
+  if (/ssl=true/i.test(url)) {
+    extra = {
+      ssl: true, 
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
+    };
+  }
+
+  fs.writeJsonSync(config, { development: Object.assign({ url, dialect }, extra) }, { spaces: '  ' });
+}
+
+module.exports = {
+  config,
+  'models-path': path.join(__dirname, 'models'),
+  'migrations-path': path.join(__dirname, 'migrations'),
+  'seeders-path': path.join(__dirname, 'seeders'),
+};
