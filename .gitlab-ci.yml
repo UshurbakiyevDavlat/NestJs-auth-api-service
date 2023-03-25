@@ -1,0 +1,113 @@
+image: docker:stable
+
+variables: &global_variables
+  IMAGE_TAG: $REGISTRY_HOST/$REGISTRY_PROJECT/$CI_PROJECT_PATH/$CI_COMMIT_BRANCH:$CI_BUILD_REF_NAME
+  LATEST_IMAGE_TAG: $REGISTRY_HOST/$REGISTRY_PROJECT/$CI_PROJECT_PATH/$CI_COMMIT_BRANCH:latest
+  PROJECT_CONFIG_FILENAME: .env
+  DOCKER_COMPOSE_FILE: docker-compose.yml
+  VM_USER: tredo
+
+stages:
+  - prepare
+  - build
+  - deploy
+
+.docker-login: &docker_login
+  before_script:
+    - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" $REGISTRY_HOST
+
+.setup_ssh: &setup_ssh_and_prepare_env
+  before_script:
+    - apk add openssh-client
+    - apk add rsync
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" > key
+    - chmod 400 key
+    - ssh-add key
+    - mkdir -p ~/.ssh
+    - echo $HOST
+    - ssh-keyscan "$HOST" >> ~/.ssh/known_hosts
+    - cat "$ENV" > "$PROJECT_CONFIG_FILENAME"
+    - echo "AUTH_API_DOCKER_COMPOSE_IMAGE_NAME=$LATEST_IMAGE_TAG" >> .env
+    - scp $PROJECT_CONFIG_FILENAME $VM_USER@$HOST:$PROJECT_CONFIG_FILENAME
+    - scp $DOCKER_COMPOSE_FILE $VM_USER@$HOST:$DOCKER_COMPOSE_FILE
+
+.publish-image: &publish_image
+  script:
+    - docker pull $LATEST_IMAGE_TAG || true
+    - docker build -t "$IMAGE_TAG" --cache-from "$LATEST_IMAGE_TAG" .
+    - docker push "$IMAGE_TAG"
+
+.switch-tag: &switch_tag
+  script:
+    - docker pull "$IMAGE_TAG"
+    - docker tag "$IMAGE_TAG" "$LATEST_IMAGE_TAG"
+    - docker push "$LATEST_IMAGE_TAG"
+
+publish-preimage-dev:
+  <<: *docker_login
+  <<: *publish_image
+  stage: prepare
+  variables:
+    <<: *global_variables
+  only:
+    - dev
+
+publish-image-dev:
+  <<: *docker_login
+  <<: *switch_tag
+  stage: build
+  allow_failure: false
+  only:
+    - dev
+
+publish-preimage-prod:
+  <<: *docker_login
+  <<: *publish_image
+  stage: prepare
+  variables:
+    <<: *global_variables
+  only:
+    - main
+
+publish-image-prod:
+  <<: *docker_login
+  <<: *switch_tag
+  stage: build
+  allow_failure: false
+  only:
+    - main
+
+.deploy: &deploy_configuration
+  script:
+    - ssh $VM_USER@$HOST "docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" $REGISTRY_HOST
+      && docker-compose pull
+      && docker-compose down --remove-orphans
+      && docker-compose up -d
+      && docker-compose ps
+      && exit"
+  allow_failure: false
+
+deploy-dev:
+  <<: *setup_ssh_and_prepare_env
+  <<: *deploy_configuration
+  stage: deploy
+  environment:
+    name: test
+  variables:
+    <<: *global_variables
+    HOST: $HOST
+  only:
+    - dev
+
+deploy-production:
+  <<: *setup_ssh_and_prepare_env
+  <<: *deploy_configuration
+  stage: deploy
+  environment:
+    name: production
+  variables:
+    <<: *global_variables
+    HOST: $HOST
+  only:
+    - main

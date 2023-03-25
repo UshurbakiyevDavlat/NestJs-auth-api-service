@@ -24,7 +24,6 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Создание юзера' })
   @ApiResponse({ status: 200, type: User })
-  @UseInterceptors(HashPasswordInterceptor)
   async create(@Body() userDto: CreateUserDto, @Res() response) {
     const result = await this.userService.createUser(userDto);
     response.status(200).json({ message: result });

@@ -1,14 +1,12 @@
-version: '3'
+version: '3.9'
 
 services:
-  auth_api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
+  auth-api:
+    container_name: ${AUTH_API_DOCKER_COMPOSE_CONTAINER_NAME}
+    image: ${AUTH_API_DOCKER_COMPOSE_IMAGE_NAME}
+    restart: unless-stopped
     ports:
-      - '3000:3000'
-    expose:
-      - '3000'
+      - "3000:3000"
+      - "50053:50053"
     volumes:
       - ./.env:/app/.env

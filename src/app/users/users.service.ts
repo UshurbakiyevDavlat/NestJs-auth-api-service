@@ -1,18 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from './users.model';
-import { CreateUserDto } from './dto/create-user-dto';
-import { DeleteUserDto } from './dto/delete-user-dto';
+import {HttpStatus, Injectable} from '@nestjs/common';
+import {InjectModel} from '@nestjs/sequelize';
+import {User} from './users.model';
+import {CreateUserDto} from './dto/create-user-dto';
+import {DeleteUserDto} from './dto/delete-user-dto';
+import {RegisterResponse} from "../auth/auth.pb";
+import {autoGeneratePassword} from "../helpers/autoGenerateStrHelper";
+import {hashPassword} from "../helpers/hashHelper";
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userRepository: typeof User) {}
 
-  async createUser(dto: CreateUserDto): Promise<User | string> {
+  async createUser(dto: CreateUserDto): Promise<RegisterResponse> {
+    dto.password = await hashPassword(await autoGeneratePassword());
     if (await this.userRepository.findOne({ where: { email: dto.email } })) {
-      return 'Пользователь с таким email уже существует';
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        errorMessage: 'Пользователь с таким email уже существует',
+        user: null,
+      }
     }
-    return await this.userRepository.create(dto);
+
+    const user =  await this.userRepository.create(dto);
+
+    return {
+      status: HttpStatus.CREATED,
+      errorMessage: null,
+      user: user,
+    };
   }
 
   async getAllUsers() {

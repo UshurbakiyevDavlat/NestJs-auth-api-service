@@ -7,7 +7,7 @@ import configuration from 'src/app/config/configuration';
 import { Env } from 'src/core/utils/env';
 import { UsersModule } from './app/users/users.module';
 import { AuthModule } from './app/auth/auth.module';
-import { RolesModule } from './roles/roles.module';
+import { RolesModule } from './app/roles/roles.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './app/auth/filter/http-exception.filter';
 

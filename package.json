@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "proto:generate": "npx protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./proto --ts_proto_out=src/app/auth/ proto/auth.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
+    "proto:generate": "npx protoc --plugin=node_modules/.bin/protoc-gen-ts_proto -I=./proto --ts_proto_out=src/app/grpc/ proto/auth.proto --ts_proto_opt=nestJs=true --ts_proto_opt=fileSuffix=.pb",
     "migration:generate": "npx sequelize-cli migration:generate --name",
     "db:migrate:up": "npx sequelize-cli db:migrate",
     "db:migrate:revert": "npx sequelize-cli db:migrate:undo",
